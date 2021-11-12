@@ -7,7 +7,16 @@ import globalStyles from '../styles/globalStyles';
 import storage from '../storage/storage';
 import ContactsPage from './ContactsPage';
 import io from "socket.io-client";
+import * as Notifications from "expo-notifications";
 
+// storage.remove({ key: 'chatrooms' })
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+    }),
+});
 
 function HomeScreen({ navigation }) {
     const actionSheetRef = createRef();
@@ -15,21 +24,40 @@ function HomeScreen({ navigation }) {
     const [hasRooms, setHasRooms] = useState([])
     // const [mounted, setMounted] = useState(true)
 
-    useEffect(async () => {
-        console.log('home mounted....');
+    React.useEffect(() => {
+        navigation.addListener('focus', async () => {
+            // do something
+            console.log('isFocused')
 
-        await storage.load({ key: 'chatrooms' })
-            .then(data => {
-                setRooms(data);
+            await storage.load({ key: 'chatrooms' })
+                .then(data => {
+                    setRooms(data);
 
-                if (data.length > 0) setHasRooms(true)
-                else setHasRooms(false)
-            }).catch(e => { console.log(e); setHasRooms(false) })
+                    if (data.length > 0) setHasRooms(true)
+                    else setHasRooms(false)
+                }).catch(e => { console.log(e); setHasRooms(false) })
+            return;
+        });
 
-        return () => {
-            setMounted(false)
-        }
-    }, [])
+        return console.log('is not isFocused');
+    }, [navigation]);
+
+    // useEffect(async () => {
+    //     console.log('home mounted....');
+
+    //     await storage.load({ key: 'chatrooms' })
+    //         .then(data => {
+    //             setRooms(data);
+
+    //             if (data.length > 0) setHasRooms(true)
+    //             else setHasRooms(false)
+    //         }).catch(e => { console.log(e); setHasRooms(false) })
+
+    //     return () => {
+    //         console.log('unmounted')
+    //         // setMounted(false)
+    //     }
+    // }, [])
 
     const hasRoomsLabel = () => {
         if (!hasRooms) return <View style={globalStyles.flexCenterColumn}>
@@ -67,7 +95,7 @@ function HomeScreen({ navigation }) {
                                 <ChatRoomCard
                                     name={room.roomName}
                                     data={room}
-                                    username={room.lastMessage}
+                                    content={room.lastMessage}
                                     counter={0} />
                             </View>
                         }
@@ -94,13 +122,20 @@ function HomeScreen({ navigation }) {
 }
 
 const ChatRoomCard = (props) => {
-    const socket = io('http://localhost:8000')
-    // const socket = io('https://signal-v2-server.herokuapp.com/')
+    // const socket = io('http://localhost:8000')
+    const socket = io('https://signal-v2-server.herokuapp.com/')
 
     const navigation = useNavigation()
+    const isFocused = navigation.isFocused();
+
     const [roomId, setRoomId] = useState('000')
     const [myNumber, setmyNumber] = useState()
+    const [isTyping, setIsTyping] = useState(false)
     const contactNumber = props.data.roomNumber
+
+
+
+    // console.log('isFocused', isFocused)
 
     getMyNumber()
 
@@ -116,11 +151,36 @@ const ChatRoomCard = (props) => {
 
     function connectToSocket() {
         socket.emit('join-room', roomId)
+        socket.on('typing', () => { setIsTyping(true); setTimeout(() => { setIsTyping(false) }, 3000); })
+        socket.on('new-message', (data) => {
+            console.log(data)
+            if (data.from !== myNumber) showNotification(data)
+        })
+    }
+
+    function showNotification(data) {
+        Notifications.scheduleNotificationAsync({
+            content: {
+                title: `${data.fromName}: `,
+                body: data.msg,
+                sound: true,
+                color: '#006aee'
+            },
+            trigger: { seconds: 1 },
+        });
     }
 
     // constants
     const counter = () => {
         if (props.counter > 0) return (<Text style={globalStyles.badgeNum}>{props.counter}</Text>)
+    }
+
+    const typingUi = () => {
+        if (isTyping) return <Text style={{
+            color: '#006aee',
+        }}>typing...</Text>
+
+        else return <Text style={globalStyles.greyText} numberOfLines={1}>{props.content}</Text>
     }
 
     const styles = StyleSheet.create({
@@ -157,7 +217,7 @@ const ChatRoomCard = (props) => {
                             <Text style={[globalStyles.greyText, styles.smallText]}>{props.data.lastMessageTimestamp}</Text>
                         </View>
                     </View>
-                    <Text style={globalStyles.greyText} numberOfLines={1}>{props.username}</Text>
+                    {typingUi()}
                 </View>
             </View>
         </TouchableOpacity>

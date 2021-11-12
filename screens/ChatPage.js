@@ -8,8 +8,8 @@ import ActionSheet from "react-native-actions-sheet";
 import axios from 'axios';
 import * as Notifications from "expo-notifications";
 
-const socket = io('http://localhost:8000')
-// const socket = io('https://signal-v2-server.herokuapp.com/')
+// const socket = io('http://localhost:8000')
+const socket = io('https://signal-v2-server.herokuapp.com/')
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -65,23 +65,20 @@ function ChatPage({ navigation, route }) {
 
         socket.on('new-message', (data) => {
             setMessages([...messages, data])
-
-            // console.log('myNumber', myNumber, 'data.from', data)
-            // if (data.to !== myNumber) showNotification(data)
         })
     }
 
-    function showNotification(data) {
-        Notifications.scheduleNotificationAsync({
-            content: {
-                title: `${data.fromName}: `,
-                body: data.msg,
-                sound: true,
-                color: '#006aee'
-            },
-            trigger: { seconds: 1 },
-        });
-    }
+    // function showNotification(data) {
+    //     Notifications.scheduleNotificationAsync({
+    //         content: {
+    //             title: `${data.fromName}: `,
+    //             body: data.msg,
+    //             sound: true,
+    //             color: '#006aee'
+    //         },
+    //         trigger: { seconds: 1 },
+    //     });
+    // }
 
     function getRoomID() {
         if (contactNumber < myNumber) setRoomId((contactNumber + myNumber).replace(/[^a-zA-Z0-9]/g, "").split(/\s+/).join(""));
@@ -89,7 +86,7 @@ function ChatPage({ navigation, route }) {
     }
 
     function initializeChatroom() {
-        console.log('initializing chatroom:-----> ', contactNumber);
+        // console.log('initializing chatroom:-----> ', contactNumber);
 
         storage.load({ key: 'chatrooms' })
             .then(data => {
@@ -141,7 +138,7 @@ function ChatPage({ navigation, route }) {
             key: roomId
         });
         setMessages([])
-        navigation.goBack()
+        navigation.pop()
     }
 
     async function sendMessage() {
@@ -163,7 +160,10 @@ function ChatPage({ navigation, route }) {
         setShowSendBtn(false)
 
         socket.emit('new-message', JSON.stringify(newMsgObject))
+        editChatroomsArray(messageText)
+    }
 
+    function editChatroomsArray(msgText) {
         const currentRoom = allRooms.find(obj => { return obj.roomNumber === contactNumber })
         const rooms = allRooms
         let currentRoomIndex = 0
@@ -177,7 +177,7 @@ function ChatPage({ navigation, route }) {
                 const newRoomData = {
                     roomNumber: contactNumber,
                     roomName: contactName,
-                    lastMessage: messageText,
+                    lastMessage: msgText,
                     avatar: 'https://i.pinimg.com/236x/af/1c/30/af1c30d6d881d9447dec06149f61d2f9--drawings-of-girls-anime-drawings-girl.jpg',
                     lastMessageTimestamp: Date().substr(16, 5),
                 }
