@@ -235,6 +235,7 @@ const ChatRoomCard = (props) => {
                     <Text style={[globalStyles.greyText, globalStyles.userCardDescription]} numberOfLines={1}>{props.content}</Text>
                 </View>
             </View>
+            
         </TouchableOpacity>
 
     )
