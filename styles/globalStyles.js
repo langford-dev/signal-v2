@@ -3,7 +3,7 @@ import { Dimensions, Platform, StatusBar, StyleSheet } from 'react-native'
 const globalStyles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#f1f1f1',
         // backgroundColor: 'rgb(235,235,240)',
     },
 
@@ -121,7 +121,8 @@ const globalStyles = StyleSheet.create({
         width: '90%'
     },
 
-    greyText: { color: 'rgb(99,99,102)' },
+    greyText: { color: '#90949D' },
+    // greyText: { color: '#B1BEC2' },
 
     boldText: { fontWeight: 'bold' },
 
@@ -164,14 +165,25 @@ const globalStyles = StyleSheet.create({
     userCard: {
         // padding: 15,
         // paddingVertical: 6,
-        paddingHorizontal: 20,
+        // paddingHorizontal: 28,
         flexDirection: 'row',
         alignItems: 'center',
         // borderBottomColor: '#f1f1f144',
         // borderBottomWidth: 1,
+        // paddingBottom: 10,
+        // paddingTop: 0,
+        // marginBottom: 0,
+
+        paddingTop: Platform.OS === 'ios' ? 10 : 15,
         paddingBottom: 10,
-        paddingTop: 0,
-        marginBottom: 0,
+        paddingHorizontal: 28,
+        marginBottom: -15,
+
+        borderTopLeftRadius: 100,
+        borderTopRightRadius: 100,
+        borderBottomLeftRadius: 100,
+        borderBottomRightRadius: 100,
+        backgroundColor: 'transparent',
     },
 
     userAvatar: {
@@ -184,6 +196,17 @@ const globalStyles = StyleSheet.create({
 
     userCardTitle: {
         marginBottom: 3,
+        fontSize: 16
+    },
+
+    userCardDescription: {
+        // backgroundColor: 'red',
+        overflow: 'hidden',
+        width: '100%',
+        borderBottomColor: '#f1f1f1',
+        borderBottomWidth: 1,
+        paddingBottom: 10,
+        // marginBottom: 10,
     },
 
     bottomSheetItem: {
@@ -240,18 +263,20 @@ const globalStyles = StyleSheet.create({
         // backgroundColor: '#fff'
         // marginBottom: 20
 
-        paddingHorizontal: 25,
+        paddingHorizontal: 20,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: '#fff',
-        paddingTop: Platform.OS === 'ios' ? 60 : StatusBar.currentHeight + 20,
+        backgroundColor: '#f1f1f1',
+        paddingTop: Platform.OS === 'ios' ? 60 : StatusBar.currentHeight - 10,
         paddingBottom: 15,
+
+        // marginBottom: 10,
     },
 
     appBarTitle: {
         fontSize: 18,
-        fontWeight: 'bold',
+        // fontWeight: 'bold',
         marginLeft: 20,
     },
 
@@ -278,26 +303,26 @@ const globalStyles = StyleSheet.create({
     letterAvatar: {
         width: 45,
         height: 45,
-        backgroundColor: '#f1f1f1',
+        // backgroundColor: '#f1f1f1',
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'row',
         borderRadius: 100,
         marginRight: 20,
 
-        backgroundColor: '#FF666622'
+        backgroundColor: '#FF655B'
     },
 
     letterAvatarLg: {
-        width: 60,
-        height: 60,
+        width: 50,
+        height: 50,
         marginRight: 10
     },
 
     letterAvatarText: {
         // fontWeight: 'bold',
         // color: '#006aee55',
-        color: '#00000055',
+        color: '#fff',
         fontSize: 20
     },
 

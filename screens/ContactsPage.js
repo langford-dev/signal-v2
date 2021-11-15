@@ -58,7 +58,7 @@ const ContactsPage = () => {
                     </TouchableOpacity>
                 </View>
             </View>
-            <ScrollView style={{ marginBottom: 20 }}>
+            <ScrollView style={{ marginBottom: 20, paddingTop: 10 }}>
                 {loader()}
                 {
                     contacts.map(

@@ -1,5 +1,5 @@
 import React, { createRef, useEffect, useState } from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, TextInput, ScrollView, Image, StyleSheet, Dimensions, Alert } from 'react-native';
+import { View, Text, SafeAreaView, TouchableOpacity, TextInput, ScrollView, Image, StatusBar, Dimensions, Alert } from 'react-native';
 import { NavigationContainer, useNavigation, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -14,6 +14,8 @@ import InputPhoneNumber from './screens/auth/InputPhoneNumber';
 import { initializeApp } from 'firebase/app';
 import HomeScreen from './screens/HomeScreen';
 import OTP from './screens/auth/OTP';
+import storage from './storage/storage';
+import { Platform } from 'expo-modules-core';
 
 const firebaseConfig = {
   apiKey: 'api-key',
@@ -28,31 +30,6 @@ const firebaseConfig = {
 
 initializeApp(firebaseConfig);
 
-// import * as Notifications from "expo-notifications";
-// import * as Permissions from "expo-permissions";
-
-// Notifications.setNotificationHandler({
-//   handleNotification: async () => ({
-//     shouldShowAlert: true,
-//     shouldPlaySound: true,
-//     shouldSetBadge: true,
-//   }),
-// });
-
-
-// async function schedulePushNotification() {
-//   await Notifications.scheduleNotificationAsync({
-//     content: {
-//       title: "Jay Shmurda:",
-//       body: 'Langford is the coolest dude 😎😇👋',
-//       sound: true,
-//       color: '#006aee'
-//     },
-//     trigger: { seconds: 2 },
-//   });
-// }
-
-
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -63,6 +40,7 @@ const tabBarStyleOptions = {
 }
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   // Alert.alert(
   //   'Alert Title',
@@ -79,45 +57,79 @@ export default function App() {
   //   { cancelable: false },
   // );
 
-  return <NavigationContainer>
-    <Stack.Navigator>
-      <Stack.Screen
-        component={InputPhoneNumber}
-        name='InputPhoneNumber'
-        options={{ headerShown: false }}
-      />
+  useEffect(() => {
+    checkIsAuth()
 
-      <Stack.Screen
-        component={OTP}
-        name='OTP'
-        options={{ headerShown: false }}
-      />
+    return () => { }
+  }, [])
 
-      <Stack.Screen
-        component={ContactsPage}
-        name='ContactsPage'
-        options={{ headerShown: false }}
-      />
+  function checkIsAuth() {
+    // storage.remove({ key: 'phoneNumber' })
+    storage.load({ key: 'phoneNumber' }).then(number => {
+      console.log('number --->', number);
+      setIsAuthenticated(true)
+    }).catch(e => {
+      console.log('not set');
+      setIsAuthenticated(false)
+    })
+  }
 
-      <Stack.Screen
-        component={HomeScreen}
-        name='HomeScreen'
-        options={{ headerShown: false }}
-      />
+  const initialRoute = () => {
+    // console.log('isAuthenticated ----->', isAuthenticated)
 
-      <Stack.Screen
-        component={ProfilePage}
-        name='ProfilePage'
-        options={{ headerShown: false }}
-      />
+    // if (isAuthenticated) return 'InputPhoneNumber'
+    // if (!isAuthenticated) return 'HomeScreen'
+  }
 
-      <Stack.Screen
-        component={ChatPage}
-        name='ChatPage'
-        options={{ headerShown: false }}
-      />
-    </Stack.Navigator>
-  </NavigationContainer>
+  const statusBar = () => {
+    // if (Platform.OS === 'ios') return <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+    // else return <StatusBar backgroundColor="#006aee" barStyle="light-content" />
+    return <StatusBar backgroundColor="#f1f1f1" barStyle="dark-content" />
+  }
+
+  return <>
+    <NavigationContainer>
+      {statusBar()}
+
+      <Stack.Navigator initialRouteName={initialRoute()} >
+        {/* <Stack.Screen
+          component={InputPhoneNumber}
+          name='InputPhoneNumber'
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          component={OTP}
+          name='OTP'
+          options={{ headerShown: false }}
+        /> */}
+
+        <Stack.Screen
+          component={HomeScreen}
+          name='HomeScreen'
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          component={ContactsPage}
+          name='ContactsPage'
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          component={ProfilePage}
+          name='ProfilePage'
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          component={ChatPage}
+          name='ChatPage'
+          options={{ headerShown: false }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer >
+  </>
 }
 
 // const HomeInit = ({ navigation, route }) => {
