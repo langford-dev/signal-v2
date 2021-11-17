@@ -9,26 +9,26 @@ const globalStyles = StyleSheet.create({
 
     textAlignCenter: { textAlign: 'center' },
 
-    appBarAlertUI: {
-        backgroundColor: '#006aee',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 10,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 3,
-        },
-        shadowOpacity: 0.27,
-        shadowRadius: 4.65,
-        elevation: 6,
+    // appBarAlertUI: {
+    //     backgroundColor: '#006aee',
+    //     flexDirection: 'row',
+    //     alignItems: 'center',
+    //     justifyContent: 'center',
+    //     padding: 10,
+    //     shadowColor: "#000",
+    //     shadowOffset: {
+    //         width: 0,
+    //         height: 3,
+    //     },
+    //     shadowOpacity: 0.27,
+    //     shadowRadius: 4.65,
+    //     elevation: 6,
 
-        position: 'absolute',
-        top: Platform.OS === 'ios' ? 103 : 90,
-        width: '100%',
-        zIndex: 10
-    },
+    //     position: 'absolute',
+    //     top: Platform.OS === 'ios' ? 103 : 90,
+    //     width: '100%',
+    //     zIndex: 10
+    // },
 
     lineHeight: {
         lineHeight: 25
@@ -70,17 +70,17 @@ const globalStyles = StyleSheet.create({
         justifyContent: 'space-between'
     },
 
-    touchableTextUI: {
-        padding: 15,
-        paddingHorizontal: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f1f1f177',
-        backgroundColor: '#fff'
-    },
+    // touchableTextUI: {
+    //     padding: 15,
+    //     paddingHorizontal: 20,
+    //     borderBottomWidth: 1,
+    //     borderBottomColor: '#f1f1f177',
+    //     backgroundColor: '#fff'
+    // },
 
-    touchableTextUIText: {
-        // fontSize: 17,
-    },
+    // touchableTextUIText: {
+    //     // fontSize: 17,
+    // },
 
     e2eLabelContainer: {
         // backgroundColor: '#f1f1f155',
@@ -104,17 +104,34 @@ const globalStyles = StyleSheet.create({
         // marginTop: 20,
     },
 
-    bottomSheet: {
-        borderRadius: 15,
-        paddingTop: 10,
+    authInputBox: {
+        // backgroundColor: '#f1f1f1',
+        // height: 45,
+        // margin: 10,
+        // paddingHorizontal: 20,
+        // borderRadius: 100,
+
+        textAlign: 'center',
+        fontSize: 20,
+        borderWidth: 1,
+        borderColor: '#f1f1f1',
+        // backgroundColor: '#f1f1f1',
+        padding: 15,
+        borderRadius: 10,
     },
 
-    inputBox: {
-        backgroundColor: '#f1f1f1',
-        height: 45,
-        margin: 10,
-        paddingHorizontal: 20,
-        borderRadius: 100,
+    btn: {
+        backgroundColor: '#006aee',
+        padding: 15,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 10,
+    },
+
+    btnText: {
+        color: '#fff',
+        fontWeight: 'bold'
     },
 
     searchInputBox: {
@@ -155,62 +172,53 @@ const globalStyles = StyleSheet.create({
         width: 30
     },
 
-    avatarMD: {
-        backgroundColor: '#f1f1f1',
-        width: 100,
-        height: 100,
-        borderRadius: 100,
-    },
+    // avatarMD: {
+    //     backgroundColor: '#f1f1f1',
+    //     width: 100,
+    //     height: 100,
+    //     borderRadius: 100,
+    // },
 
     userCard: {
-        // padding: 15,
-        // paddingVertical: 6,
-        // paddingHorizontal: 28,
         flexDirection: 'row',
         alignItems: 'center',
-        // borderBottomColor: '#f1f1f144',
-        // borderBottomWidth: 1,
-        // paddingBottom: 10,
-        // paddingTop: 0,
-        // marginBottom: 0,
-
-        paddingTop: Platform.OS === 'ios' ? 10 : 15,
-        paddingBottom: 10,
-        paddingHorizontal: 28,
-        marginBottom: -15,
-
-        borderTopLeftRadius: 100,
-        borderTopRightRadius: 100,
-        borderBottomLeftRadius: 100,
-        borderBottomRightRadius: 100,
-        backgroundColor: 'transparent',
+        paddingHorizontal: 20,
+        paddingVertical: 3,
+        backgroundColor: '#ffffff00',
     },
 
-    userAvatar: {
-        backgroundColor: '#f1f1f1',
-        width: 60,
-        height: 60,
-        borderRadius: 100,
-        marginRight: 15
-    },
+    // userAvatar: {
+    //     backgroundColor: '#f1f1f1',
+    //     width: 60,
+    //     height: 60,
+    //     borderRadius: 100,
+    //     marginRight: 15
+    // },
 
     userCardTitle: {
         marginBottom: 3,
         fontSize: 16
     },
 
-    userCardDescription: {
-        // backgroundColor: 'red',
-        overflow: 'hidden',
-        width: '100%',
-        borderBottomColor: '#f1f1f1',
-        borderBottomWidth: 1,
-        paddingBottom: 10,
-        // marginBottom: 10,
+    // userCardDescription: {
+    //     // backgroundColor: 'red',
+    //     overflow: 'hidden',
+    //     width: '100%',
+    //     borderBottomColor: '#f1f1f1',
+    //     borderBottomWidth: 1,
+    //     paddingBottom: 10,
+    //     // marginBottom: 10,
+    // },
+
+    bottomSheet: {
+        borderRadius: 15,
+        paddingTop: 10,
     },
 
     bottomSheetItem: {
-        padding: 20,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        width: '100%'
     },
 
     fab: {
@@ -236,33 +244,23 @@ const globalStyles = StyleSheet.create({
         elevation: 6,
     },
 
-    badgeNum: {
-        backgroundColor: '#006aee',
-        color: '#fff',
-        paddingHorizontal: 7,
-        fontSize: 11,
-        paddingVertical: 3,
-        borderRadius: 100,
-        marginRight: 10,
-    },
+    // badgeNum: {
+    //     backgroundColor: '#006aee',
+    //     color: '#fff',
+    //     paddingHorizontal: 7,
+    //     fontSize: 11,
+    //     paddingVertical: 3,
+    //     borderRadius: 100,
+    //     marginRight: 10,
+    // },
 
-    shadow: {
-        shadowColor: '#00000055',
-        shadowOpacity: 1,
-        shadowRadius: 10,
-    },
+    // shadow: {
+    //     shadowColor: '#00000055',
+    //     shadowOpacity: 1,
+    //     shadowRadius: 10,
+    // },
 
     appBar: {
-        // height: 60,
-        // paddingHorizontal: 20,
-        // // borderBottomColor: '#eee',
-        // // borderBottomWidth: 1,
-        // flexDirection: 'row',
-        // alignItems: 'center',
-        // justifyContent: 'space-between',
-        // backgroundColor: '#fff'
-        // marginBottom: 20
-
         paddingHorizontal: 20,
         flexDirection: 'row',
         alignItems: 'center',
@@ -270,39 +268,46 @@ const globalStyles = StyleSheet.create({
         backgroundColor: '#f1f1f1',
         paddingTop: Platform.OS === 'ios' ? 60 : StatusBar.currentHeight - 10,
         paddingBottom: 15,
-
-        // marginBottom: 10,
     },
 
     appBarTitle: {
         fontSize: 18,
         // fontWeight: 'bold',
-        marginLeft: 20,
     },
 
-    appBarAvatar: {
-        width: 40,
-        height: 40,
-        backgroundColor: '#f1f1f1',
-        borderRadius: 100
+    roundedScrollView: {
+        paddingTop: 20,
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
+        borderBottomLeftRadius: 25,
+        borderBottomRightRadius: 25,
+        height: Dimensions.get('window').height
     },
 
-    homeTabsContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-        position: 'absolute',
-        bottom: 0,
-        width: '100%',
-        height: 60,
-        backgroundColor: '#fff'
-    },
+    // appBarAvatar: {
+    //     width: 40,
+    //     height: 40,
+    //     backgroundColor: '#f1f1f1',
+    //     borderRadius: 100
+    // },
 
-    homeTabItem: {},
+    // homeTabsContainer: {
+    //     flexDirection: 'row',
+    //     alignItems: 'center',
+    //     justifyContent: 'space-around',
+    //     position: 'absolute',
+    //     bottom: 0,
+    //     width: '100%',
+    //     height: 60,
+    //     backgroundColor: '#fff'
+    // },
+
+    // homeTabItem: {},
 
     letterAvatar: {
-        width: 45,
-        height: 45,
+        width: 55,
+        height: 55,
         // backgroundColor: '#f1f1f1',
         alignItems: 'center',
         justifyContent: 'center',
@@ -313,11 +318,11 @@ const globalStyles = StyleSheet.create({
         backgroundColor: '#FF655B'
     },
 
-    letterAvatarLg: {
-        width: 50,
-        height: 50,
-        marginRight: 10
-    },
+    // letterAvatarLg: {
+    //     width: 50,
+    //     height: 50,
+    //     marginRight: 10
+    // },
 
     letterAvatarText: {
         // fontWeight: 'bold',
@@ -329,52 +334,60 @@ const globalStyles = StyleSheet.create({
     loader: {
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').height,
+        position: 'absolute',
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         flexDirection: 'row',
-        backgroundColor: '#fff'
+        // backgroundColor: '#fff'
     },
 
-    smallText: {
-        fontSize: 11,
-        color: '#24242466'
-    },
+    // smallText: {
+    //     fontSize: 11,
+    //     color: '#24242466'
+    // },
 
     inputBoxIcon: {
         // borderColor: '#f1f1f1',
         backgroundColor: '#fff',
-        // borderWidth: 1,
+        // width: Dimensions.get('window').width - 32,
+        // // borderWidth: 1,
         borderRadius: 25,
         paddingHorizontal: 15,
-        paddingLeft: 8,
-        // width: '80%'
-        flex: 1,
+        // paddingLeft: 8,
+        width: '86%',
+        // flex: 1,
         paddingVertical: 9,
         alignItems: 'baseline',
 
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.20,
-        shadowRadius: 1.41,
-        elevation: 2,
+        // shadowColor: "#000",
+        // shadowOffset: {
+        //     width: 0,
+        //     height: 1,
+        // },
+        // shadowOpacity: 0.20,
+        // shadowRadius: 1.41,
+        // elevation: 2,
     },
 
     inputBoxIconInput: {
-        width: '250%',
+        // width: '250%',
         fontSize: 16,
         // flex: 2,
         marginLeft: 5,
         padding: 0,
         // backgroundColor: 'red',
         height: '100%',
-        overflow: 'scroll'
-        // paddingRight: 20,
+        paddingRight: 20,
         // marginTop: Platform.OS === 'ios' ? 4 : 0,
         // backgroundColor: 'red'
+    },
+
+    sendBtn: {
+        // backgroundColor: '#242424',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 15
     },
 
     messageBubble: {
@@ -433,12 +446,13 @@ const globalStyles = StyleSheet.create({
 
     myTimestamp: {
         color: '#ffffff77',
+        textAlign: 'right'
     },
 
-    bigPadding: {
-        paddingTop: 100,
-        paddingHorizontal: 30
-    }
+    // bigPadding: {
+    //     paddingTop: 100,
+    //     paddingHorizontal: 30
+    // }
 })
 
 export default globalStyles

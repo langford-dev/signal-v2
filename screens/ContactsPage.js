@@ -36,8 +36,6 @@ const ContactsPage = () => {
         if (loading) return (
             <View style={[globalStyles.loader, globalStyles.flexCenterColumn]}>
                 <ActivityIndicator size={50} color="#006aee" />
-                {/* <View style={globalStyles.space20}></View> */}
-                {/* <Text style={globalStyles.smallText}>Fetching your contact list</Text> */}
             </View>
         )
     }
@@ -58,7 +56,7 @@ const ContactsPage = () => {
                     </TouchableOpacity>
                 </View>
             </View>
-            <ScrollView style={{ marginBottom: 20, paddingTop: 10 }}>
+            <ScrollView style={globalStyles.roundedScrollView}>
                 {loader()}
                 {
                     contacts.map(

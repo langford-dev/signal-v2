@@ -1,5 +1,5 @@
-import React, { createRef, useEffect, useState } from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, TextInput, ScrollView, Image, StyleSheet, Dimensions, Alert } from 'react-native';
+import React, { createRef, useEffect, useRef, useState } from 'react';
+import { View, Text, SafeAreaView, TouchableOpacity, TextInput, ActivityIndicator, ScrollView, Image, StyleSheet, Dimensions, Alert } from 'react-native';
 import { NavigationContainer, useNavigation, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import ActionSheet from "react-native-actions-sheet";
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -8,6 +8,9 @@ import storage from '../storage/storage';
 import ContactsPage from './ContactsPage';
 import io from "socket.io-client";
 import * as Notifications from "expo-notifications";
+// import { auth } from '../firebase';
+// import { RecaptchaVerifier } from '@firebase/auth';
+// import { RecaptchaVerifier } from '@firebase/auth';
 
 // const socket = io('http://localhost:8000')
 const socket = io('https://signal-v2-server.herokuapp.com/')
@@ -23,13 +26,22 @@ Notifications.setNotificationHandler({
 
 function HomeScreen({ navigation }) {
     const actionSheetRef = createRef();
+
     const [rooms, setRooms] = useState([])
     const [hasRooms, setHasRooms] = useState([])
-    // const [mounted, setMounted] = useState(true)
+    const [phoneNumber, setPhoneNumber] = useState('')
+    const [password, setPassword] = useState('')
+    const [isAuth, setIsAuth] = useState(false)
+    const [isEnteredNumber, setIsEnteredNumber] = useState(false)
+    const [loading, setLoading] = useState(false)
+
+    // const [initializing, setInitializing] = useState(true);
+    // const [user, setUser] = useState();
+    // const [confirm, setConfirm] = useState(null);
+    // const [code, setCode] = useState('');
 
     React.useEffect(() => {
         navigation.addListener('focus', async () => {
-            // do something
             console.log('isFocused')
 
             await storage.load({ key: 'chatrooms' })
@@ -42,28 +54,8 @@ function HomeScreen({ navigation }) {
             return;
         });
 
-        return () => {
-            // socket.offAny();
-            console.log('is not isFocused');
-        }
+        return () => { console.log('is not isFocused'); }
     }, [navigation]);
-
-    // useEffect(async () => {
-    //     console.log('home mounted....');
-
-    //     await storage.load({ key: 'chatrooms' })
-    //         .then(data => {
-    //             setRooms(data);
-
-    //             if (data.length > 0) setHasRooms(true)
-    //             else setHasRooms(false)
-    //         }).catch(e => { console.log(e); setHasRooms(false) })
-
-    //     return () => {
-    //         console.log('unmounted')
-    //         // setMounted(false)
-    //     }
-    // }, [])
 
     const hasRoomsLabel = () => {
         if (!hasRooms) return <View style={globalStyles.flexCenterColumn}>
@@ -73,7 +65,89 @@ function HomeScreen({ navigation }) {
         </View>
     }
 
-    return (
+    const triggerInputNumber = () => {
+        console.log(phoneNumber)
+
+        setLoading(true)
+        setTimeout(() => {
+            setLoading(false)
+            setIsEnteredNumber(true)
+        }, 2000);
+    }
+
+    const checkPassword = () => {
+        setIsAuth(true)
+    }
+
+    if (loading) return (
+        <View style={[globalStyles.loader, globalStyles.flexCenterColumn]}>
+            <ActivityIndicator size={50} color="#006aee" />
+        </View>
+    )
+
+    // password
+    if (!isAuth && isEnteredNumber) return (
+        <ScrollView style={{ paddingVertical: 100, paddingHorizontal: 20, backgroundColor: '#fff', }}>
+            <Text style={[globalStyles.lgText, globalStyles.textAlignCenter]}> Enter password </Text>
+            <View style={globalStyles.space10} />
+            <Text style={[globalStyles.textAlignCenter, globalStyles.greyText, globalStyles.lineHeight]}> This password will be required everytime you login. This extra layer of protection keeps your account safe from attackers </Text>
+            <View style={globalStyles.space10} />
+            <TouchableOpacity onPress={() => setIsEnteredNumber(false)}>
+                <Text style={[globalStyles.textBtn, globalStyles.textAlignCenter]}> Change number {phoneNumber} </Text>
+            </TouchableOpacity>
+            <View style={globalStyles.space30} />
+            <TextInput
+                autoFocus={true}
+                style={globalStyles.authInputBox}
+                value={password}
+                onChangeText={(value) => setPassword(value.split(/\s+/).join(""))} />
+
+            <View style={globalStyles.space30}></View>
+            <TouchableOpacity style={globalStyles.btn} onPress={() => checkPassword()}>
+                <Text style={globalStyles.btnText}>Next</Text>
+            </TouchableOpacity>
+        </ScrollView>
+    )
+
+
+    // phone number
+    if (!isAuth && !isEnteredNumber) return (<View style={{
+        width: Dimensions.get('window').width,
+        height: Dimensions.get('window').height,
+        zIndex: 1000,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+    }}>
+
+        <ScrollView style={{ paddingVertical: 100, paddingHorizontal: 20, backgroundColor: '#fff', }}>
+            <View style={globalStyles.flexCenterColumn}>
+                <Text style={[globalStyles.lgText, globalStyles.textAlignCenter]}>
+                    Input your phone number to get started
+                </Text>
+            </View>
+            <View style={globalStyles.space30}></View>
+            <Text style={[globalStyles.textAlignCenter, globalStyles.greyText, globalStyles.lineHeight]}>
+                Your number will be only be visible to people who have your number saved on their contact list
+            </Text>
+            <View style={globalStyles.space30}></View>
+
+            <TextInput
+                autoFocus={true}
+                keyboardType='phone-pad'
+                style={globalStyles.authInputBox}
+                value={phoneNumber}
+                onChangeText={(value) => setPhoneNumber(value.replace(/[^a-zA-Z0-9]/g, "").split(/\s+/).join(""))} />
+
+            <View style={globalStyles.space30}></View>
+            <TouchableOpacity style={globalStyles.btn} onPress={() => triggerInputNumber()}>
+                <Text style={globalStyles.btnText}>Next</Text>
+            </TouchableOpacity>
+        </ScrollView>
+
+    </View>)
+
+    if (isAuth && isEnteredNumber) return (
         <View style={globalStyles.container}>
             <View style={globalStyles.appBar}>
                 <View style={globalStyles.flex}>
@@ -92,16 +166,7 @@ function HomeScreen({ navigation }) {
                 </View>
             </View>
 
-            <ScrollView style={{
-                backgroundColor: '#fff',
-
-                // backgroundColor: 'red',
-                paddingTop: 20,
-                borderTopLeftRadius: 40,
-                borderTopRightRadius: 40,
-                borderBottomLeftRadius: 40,
-                borderBottomRightRadius: 40,
-            }}>
+            <ScrollView style={globalStyles.roundedScrollView}>
                 {hasRoomsLabel()}
                 {
                     rooms.map(
@@ -235,7 +300,7 @@ const ChatRoomCard = (props) => {
                     <Text style={[globalStyles.greyText, globalStyles.userCardDescription]} numberOfLines={1}>{props.content}</Text>
                 </View>
             </View>
-            
+
         </TouchableOpacity>
 
     )

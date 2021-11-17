@@ -1,4 +1,4 @@
-import React, { createRef, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, SafeAreaView, TouchableOpacity, TextInput, ScrollView, Image, StatusBar, Dimensions, Alert } from 'react-native';
 import { NavigationContainer, useNavigation, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -11,24 +11,28 @@ import ProfilePage from './screens/ProfilePage';
 import ContactsPage from './screens/ContactsPage';
 // import storage from './storage/storage';
 import InputPhoneNumber from './screens/auth/InputPhoneNumber';
-import { initializeApp } from 'firebase/app';
+// import { initializeApp } from 'firebase/app';
 import HomeScreen from './screens/HomeScreen';
 import OTP from './screens/auth/OTP';
 import storage from './storage/storage';
 import { Platform } from 'expo-modules-core';
 
-const firebaseConfig = {
-  apiKey: 'api-key',
-  authDomain: 'project-id.firebaseapp.com',
-  databaseURL: 'https://project-id.firebaseio.com',
-  projectId: 'project-id',
-  storageBucket: 'project-id.appspot.com',
-  messagingSenderId: 'sender-id',
-  appId: 'app-id',
-  measurementId: 'G-measurement-id',
-};
+// import { initializeApp } from '@react-native-firebase/app'
+// import { YellowBox } from 'react-native';
 
-initializeApp(firebaseConfig);
+// YellowBox.ignoreWarnings(['Warning: Async Storage has been extracted from react-native core']);
+
+// const firebaseConfig = {
+//   apiKey: "AIzaSyCcAOwdLTLXmNZ7zCy-1X3ynWkFH2AGBT4",
+//   authDomain: "signal-v2.firebaseapp.com",
+//   projectId: "signal-v2",
+//   storageBucket: "signal-v2.appspot.com",
+//   messagingSenderId: "882317468319",
+//   appId: "1:882317468319:web:fc67e23a3ee92c4c48b8aa",
+//   measurementId: "G-4MX5YB2QR9"
+// };
+
+// initializeApp(firebaseConfig);
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();

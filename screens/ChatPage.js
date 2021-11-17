@@ -36,6 +36,8 @@ const ChatPage = ({ navigation, route }) => {
     const [allRooms, setAllRooms] = useState([])
     const [myNumber, setMyNumber] = useState()
 
+    const scrollViewRef = useRef();
+
     React.useEffect(async () => {
         const initApp = async () => {
             try {
@@ -43,6 +45,9 @@ const ChatPage = ({ navigation, route }) => {
                     setMyNumber(number)
                     setRoomId(getRoomID())
                     initializeChatroom()
+
+
+                    // scrollViewRef.current.scrollToEnd({ animated: true })
                 });
             } catch (error) {
                 console.log(error)
@@ -73,12 +78,11 @@ const ChatPage = ({ navigation, route }) => {
     useEffect(async () => {
         const showSavedMessages = async () => {
             try {
-
                 storage.load({ key: roomId }).then(data => {
                     console.log(data.length)
                     setMessages(data)
+                    scrollViewRef.current.scrollToEnd()
                 }).catch(e => console.log(e))
-
             } catch (error) {
                 console.log(error)
             }
@@ -170,6 +174,7 @@ const ChatPage = ({ navigation, route }) => {
         }
 
         setMessages([...messages, newMsgObject])
+        scrollViewRef.current.scrollToEnd()
         setMessageText('')
         setShowSendBtn(false)
 
@@ -245,48 +250,54 @@ const ChatPage = ({ navigation, route }) => {
     const sendBtn = () => {
         if (showSendBtn) {
             return (
-                <TouchableOpacity style={styles.sendBtn} onPress={() => sendMessage()}>
+                <TouchableOpacity style={globalStyles.sendBtn} onPress={() => sendMessage()}>
                     <Icon name='ios-send' color='#006aee' size={35} />
                 </TouchableOpacity>
             )
         }
 
-        // else return (
-        //     <View style={[globalStyles.flex, styles.textInputContainerIcons]}>
-        //         <TouchableOpacity style={{
-        //             backgroundColor: '#006aee',
-        //             borderRadius: 100,
-        //             width: 47,
-        //             height: 47,
-        //             marginLeft: -1,
-        //             flexDirection: 'row',
-        //             alignItems: 'center',
-        //             justifyContent: 'center'
+        else return (
+            <View style={[globalStyles.flex, styles.textInputContainerIcons]}>
+                <TouchableOpacity style={{
+                    backgroundColor: '#006aee',
+                    borderRadius: 100,
+                    width: 47,
+                    height: 47,
+                    marginLeft: -1,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center'
 
-        //         }}><Icon name='ios-add-outline' color='#fff' size={35} /></TouchableOpacity>
-        //         {/* <View style={globalStyles.space10}></View> */}
-        //         {/* <TouchableOpacity><Icon name='ios-camera-outline' color='#006aee' size={29} /></TouchableOpacity> */}
-        //     </View>
-        // )
+                }}><Icon name='ios-add-outline' color='#fff' size={35} /></TouchableOpacity>
+                {/* <View style={globalStyles.space10}></View> */}
+                {/* <TouchableOpacity><Icon name='ios-camera-outline' color='#006aee' size={29} /></TouchableOpacity> */}
+            </View>
+        )
     }
 
     const MessageItemUi = (data) => {
         if (data.from === myNumber && !isEmoji(data.msg)) return (
+            // <View style={[globalStyles.flex, globalStyles.messageBubble, globalStyles.myMessageBubble]}>
+            //     <Text style={globalStyles.msgTime}>{data.timestamp}</Text>
+            //     <Text style={[globalStyles.msgText, globalStyles.myMsgText]}>{data.msg}</Text>
+            // </View>
+
             <View style={[globalStyles.messageBubble, globalStyles.myMessageBubble]}>
-                <Text>
+                <Text style={{
+                    backgroundColor: '#006aee'
+                }}>
                     <Text style={[globalStyles.messageText, globalStyles.myMessageText]}>{data.msg}</Text>
-                    <View style={globalStyles.space10}></View>
-                    <Text style={[globalStyles.smallText, globalStyles.myTimestamp]}>{data.timestamp}</Text>
                 </Text>
+                <Text style={[globalStyles.smallText, globalStyles.myTimestamp]}>{data.timestamp}</Text>
             </View>
         )
 
         if (data.from !== myNumber && !isEmoji(data.msg)) return (
             <View style={globalStyles.messageBubble}>
                 <Text>
-                    <Text style={globalStyles.messageText}>{data.msg}</Text>
-                    <View style={globalStyles.space10}></View>
                     <Text style={globalStyles.smallText}>{data.timestamp}</Text>
+                    <View style={globalStyles.space10}></View>
+                    <Text style={globalStyles.messageText}>{data.msg}</Text>
                 </Text>
             </View>
         )
@@ -294,9 +305,9 @@ const ChatPage = ({ navigation, route }) => {
         if (data.from === myNumber && isEmoji(data.msg)) return (
             <View style={[globalStyles.emojiBubble, globalStyles.myEmojiBubble]}>
                 <Text>
-                    <Text style={[globalStyles.messageText, globalStyles.myMessageText, globalStyles.emojiText]}>{data.msg}</Text>
-                    <View style={globalStyles.space10}></View>
                     <Text style={[globalStyles.smallText, globalStyles.myTimestamp, globalStyles.greyText]}>{data.timestamp}</Text>
+                    <View style={globalStyles.space10}></View>
+                    <Text style={[globalStyles.messageText, globalStyles.myMessageText, globalStyles.emojiText]}>{data.msg}</Text>
                 </Text>
             </View>
         )
@@ -304,9 +315,9 @@ const ChatPage = ({ navigation, route }) => {
         if (data.from !== myNumber && isEmoji(data.msg)) return (
             <View>
                 <Text>
-                    <Text style={[globalStyles.messageText, globalStyles.myMessageText, globalStyles.emojiText]}>{data.msg}</Text>
-                    <View style={globalStyles.space10}></View>
                     <Text style={[globalStyles.smallText, globalStyles.myTimestamp, globalStyles.greyText]}>{data.timestamp}</Text>
+                    <View style={globalStyles.space10}></View>
+                    <Text style={[globalStyles.messageText, globalStyles.myMessageText, globalStyles.emojiText]}>{data.msg}</Text>
                 </Text>
             </View>
         )
@@ -342,13 +353,13 @@ const ChatPage = ({ navigation, route }) => {
                 position: 'absolute'
             }} />
 
-            <ScrollView style={{ position: 'relative', paddingTop: 50, marginBottom: 70 }}>
-                <View style={globalStyles.flexCenterColumn}>
+            <ScrollView ref={scrollViewRef} style={{ marginBottom: 63 }}>
+                {/* <View style={globalStyles.flexCenterColumn}>
                     <View style={globalStyles.space30}></View>
                     <View style={globalStyles.avatarMD}></View>
                     <View style={globalStyles.space30}></View>
                     <Text style={[globalStyles.whiteText, globalStyles.mdtext, globalStyles.boldText]}>{contactName}</Text>
-                </View>
+                </View> */}
 
                 <TouchableOpacity
                     onPress={() => Alert.alert('Privacy', 'Your conversation is relayed over a secured encrypted peer to peer connection. This means your messages stay between you and the people you choose')}
@@ -364,7 +375,6 @@ const ChatPage = ({ navigation, route }) => {
                     )
                 }
             </ScrollView>
-            <View style={{ height: -100 }}></View>
 
             <View style={styles.textInputContainer}>
                 <Image source={chatBackgroungImg} resizeMode="cover" style={{
@@ -469,13 +479,6 @@ const styles = StyleSheet.create({
         flex: 1,
         marginLeft: 15,
         // fontSize: 17,
-    },
-
-    sendBtn: {
-        // backgroundColor: '#242424',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginLeft: 15
     },
 
     textBtn: {
