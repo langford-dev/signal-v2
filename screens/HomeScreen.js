@@ -8,11 +8,8 @@ import storage from '../storage/storage';
 import ContactsPage from './ContactsPage';
 import io from "socket.io-client";
 import * as Notifications from "expo-notifications";
-// import { auth } from '../firebase';
-// import { RecaptchaVerifier } from '@firebase/auth';
-// import { RecaptchaVerifier } from '@firebase/auth';
+import axios from 'axios';
 
-// const socket = io('http://localhost:8000')
 const socket = io('https://signal-v2-server.herokuapp.com/')
 
 // storage.remove({ key: 'chatrooms' })
@@ -29,8 +26,8 @@ function HomeScreen({ navigation }) {
 
     const [rooms, setRooms] = useState([])
     const [hasRooms, setHasRooms] = useState([])
-    const [phoneNumber, setPhoneNumber] = useState('')
-    const [password, setPassword] = useState('')
+    const [phoneNumber, setPhoneNumber] = useState('+233550202871')
+    const [otp, setOTP] = useState('')
     const [isAuth, setIsAuth] = useState(false)
     const [isEnteredNumber, setIsEnteredNumber] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -41,11 +38,24 @@ function HomeScreen({ navigation }) {
     // const [code, setCode] = useState('');
 
     React.useEffect(() => {
+
         navigation.addListener('focus', async () => {
             console.log('isFocused')
 
+            await storage.load({ key: 'phoneNumber' }).then(data => {
+                // console.log('phoneNumber', data)
+
+                if (data !== null) {
+                    setLoading(true)
+                    setPhoneNumber(data)
+                    setIsEnteredNumber(true)
+                    setIsAuth(true)
+                }
+            })
+
             await storage.load({ key: 'chatrooms' })
                 .then(data => {
+                    setLoading(false)
                     setRooms(data);
 
                     if (data.length > 0) setHasRooms(true)
@@ -65,18 +75,41 @@ function HomeScreen({ navigation }) {
         </View>
     }
 
-    const triggerInputNumber = () => {
-        console.log(phoneNumber)
+    const triggerInputNumber = async () => {
+        try {
+            setLoading(true)
+            const reponse = await axios.post('http://localhost:4040/auth/number', { 'number': phoneNumber })
+            console.log(reponse.data)
 
-        setLoading(true)
-        setTimeout(() => {
-            setLoading(false)
-            setIsEnteredNumber(true)
-        }, 2000);
+            if (reponse != null) {
+                setIsEnteredNumber(true)
+                setLoading(false)
+            }
+        } catch (e) {
+            setLoading(false);
+            alert('A network error occured. Please try again')
+        }
     }
 
-    const checkPassword = () => {
-        setIsAuth(true)
+    const checkotp = async () => {
+        try {
+            setLoading(true)
+            const reponse = await axios.post('http://localhost:4040/auth/verify/number', { 'number': phoneNumber, 'otp': otp })
+            console.log(reponse.data)
+
+            if (reponse.data.status === 'approved') {
+                await storage.save({ key: 'phoneNumber', data: phoneNumber })
+                setLoading(false)
+                setIsAuth(true)
+            }
+
+            else { alert('You entered the wrong code'); setLoading(false) }
+
+        } catch (e) {
+            setLoading(false)
+            console.log(e)
+            alert('A network error occured. Please try again')
+        }
     }
 
     if (loading) return (
@@ -85,12 +118,12 @@ function HomeScreen({ navigation }) {
         </View>
     )
 
-    // password
+    // otp
     if (!isAuth && isEnteredNumber) return (
         <ScrollView style={{ paddingVertical: 100, paddingHorizontal: 20, backgroundColor: '#fff', }}>
-            <Text style={[globalStyles.lgText, globalStyles.textAlignCenter]}> Enter password </Text>
+            <Text style={[globalStyles.lgText, globalStyles.textAlignCenter]}> Verify your account </Text>
             <View style={globalStyles.space10} />
-            <Text style={[globalStyles.textAlignCenter, globalStyles.greyText, globalStyles.lineHeight]}> This password will be required everytime you login. This extra layer of protection keeps your account safe from attackers </Text>
+            <Text style={[globalStyles.textAlignCenter, globalStyles.greyText, globalStyles.lineHeight]}> Enter the OTP you received by SMS. This extra layer of security protects your account from attacters </Text>
             <View style={globalStyles.space10} />
             <TouchableOpacity onPress={() => setIsEnteredNumber(false)}>
                 <Text style={[globalStyles.textBtn, globalStyles.textAlignCenter]}> Change number {phoneNumber} </Text>
@@ -99,12 +132,12 @@ function HomeScreen({ navigation }) {
             <TextInput
                 autoFocus={true}
                 style={globalStyles.authInputBox}
-                value={password}
-                onChangeText={(value) => setPassword(value.split(/\s+/).join(""))} />
+                value={otp}
+                onChangeText={(value) => setOTP(value.split(/\s+/).join(""))} />
 
             <View style={globalStyles.space30}></View>
-            <TouchableOpacity style={globalStyles.btn} onPress={() => checkPassword()}>
-                <Text style={globalStyles.btnText}>Next</Text>
+            <TouchableOpacity style={globalStyles.btn} onPress={() => checkotp()}>
+                <Text style={globalStyles.btnText}>Verify</Text>
             </TouchableOpacity>
         </ScrollView>
     )
@@ -137,7 +170,8 @@ function HomeScreen({ navigation }) {
                 keyboardType='phone-pad'
                 style={globalStyles.authInputBox}
                 value={phoneNumber}
-                onChangeText={(value) => setPhoneNumber(value.replace(/[^a-zA-Z0-9]/g, "").split(/\s+/).join(""))} />
+                onChangeText={(value) => setPhoneNumber(value)} />
+            {/* onChangeText={(value) => setPhoneNumber(value.replace(/[^a-zA-Z0-9]/g, "").split(/\s+/).join(""))} /> */}
 
             <View style={globalStyles.space30}></View>
             <TouchableOpacity style={globalStyles.btn} onPress={() => triggerInputNumber()}>
