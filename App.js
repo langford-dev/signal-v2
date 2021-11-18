@@ -86,7 +86,7 @@ export default function App() {
   }
 
   const statusBar = () => {
-    if (Platform.OS === 'ios') return <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+    if (Platform.OS === 'ios') return <StatusBar backgroundColor="#fff" barStyle="light-content" />
     else return <StatusBar backgroundColor="#006aee" barStyle="light-content" />
     // return <StatusBar backgroundColor="#fff" barStyle="dark-content" />
   }

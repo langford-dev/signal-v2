@@ -267,13 +267,15 @@ const globalStyles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: '#f1f1f1',
+        backgroundColor: '#006aee',
+        // backgroundColor: '#f1f1f1',
         paddingTop: Platform.OS === 'ios' ? 60 : StatusBar.currentHeight - 10,
         paddingBottom: 15,
     },
 
     appBarTitle: {
         fontSize: 18,
+        color: '#fff'
         // fontWeight: 'bold',
     },
 

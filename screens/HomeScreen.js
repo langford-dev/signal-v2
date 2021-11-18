@@ -14,7 +14,7 @@ import CountryPicker from 'react-native-country-picker-modal'
 
 const socket = io('https://signal-v2-server.herokuapp.com/')
 
-// storage.remove({ key: 'chatrooms' })
+// storage.remove({ key: 'roomID' })
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
         shouldShowAlert: true,
@@ -57,7 +57,7 @@ function HomeScreen({ navigation }) {
 
                 .catch(e => { console.log(e) })
 
-            await storage.load({ key: 'chatrooms' })
+            await storage.load({ key: 'rooms' })
                 .then(data => {
                     setLoading(false)
                     setRooms(data);
@@ -66,7 +66,7 @@ function HomeScreen({ navigation }) {
                     else setHasRooms(false)
                 })
 
-                .catch(e => { console.log(e); setHasRooms(false) })
+                .catch(e => { setLoading(false); console.log(e); setHasRooms(false) })
             return;
         });
 
@@ -95,7 +95,7 @@ function HomeScreen({ navigation }) {
                 return
             }
 
-            if (countryCode) {
+            if (countryCode && !isEnteredNumber) {
                 setLoading(true)
 
                 const newNumber = countryCode + phoneNumber
@@ -134,7 +134,7 @@ function HomeScreen({ navigation }) {
             console.log(reponse.data)
 
             if (reponse.data.status === 'approved' && reponse.data.valid) {
-                await storage.save({ key: 'phoneNumber', data: phoneNumber })
+                await storage.save({ key: 'phoneNumber', data: countryCode + phoneNumber })
                 setLoading(false)
                 setIsAuth(true)
             }
@@ -159,7 +159,7 @@ function HomeScreen({ navigation }) {
         <ScrollView style={{ paddingVertical: 70, paddingHorizontal: 20, backgroundColor: '#fff', }}>
             <Text style={[globalStyles.lgText, globalStyles.textAlignCenter]}> Verify your account </Text>
             <View style={globalStyles.space10} />
-            <Text style={[globalStyles.textAlignCenter, globalStyles.greyText, globalStyles.lineHeight]}> Enter the OTP you received by SMS. This extra layer of security protects your account from attacters </Text>
+            <Text style={[globalStyles.textAlignCenter, globalStyles.greyText, globalStyles.lineHeight]}> Enter the OTP you received by SMS. This extra layer of security protects your account from attackers </Text>
             <View style={globalStyles.space10} />
             <TouchableOpacity onPress={() => setIsEnteredNumber(false)}>
                 <Text style={[globalStyles.textBtn, globalStyles.textAlignCenter]}> Change number {countryCode + phoneNumber} </Text>
@@ -233,6 +233,7 @@ function HomeScreen({ navigation }) {
 
     </View>)
 
+    // HomeScreen
     if (isAuth && isEnteredNumber) return (
         <View style={globalStyles.container}>
             <View style={globalStyles.appBar}>
@@ -245,10 +246,10 @@ function HomeScreen({ navigation }) {
 
                 <View style={globalStyles.flex}>
                     <TouchableOpacity onPress={() => { navigation.navigate(SearchPage) }}>
-                        <Icon name='ios-search-outline' size={22} color='#006aee' />
+                        <Icon name='ios-search-outline' size={22} color='#fff' />
                     </TouchableOpacity>
                     <View style={globalStyles.space30}></View>
-                    <TouchableOpacity><Icon name='ellipsis-vertical-outline' color='#006aee' size={23} /></TouchableOpacity>
+                    <TouchableOpacity><Icon name='ellipsis-vertical-outline' color='#fff' size={23} /></TouchableOpacity>
                 </View>
             </View>
 

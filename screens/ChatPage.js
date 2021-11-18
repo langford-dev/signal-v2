@@ -100,7 +100,7 @@ const ChatPage = ({ navigation, route }) => {
     }
 
     const initializeChatroom = async () => {
-        storage.load({ key: 'chatrooms' })
+        storage.load({ key: 'rooms' })
             .then(data => {
                 setAllRooms(data)
                 const currentObject = data.find(obj => { return obj.roomNumber === contactNumber })
@@ -120,7 +120,7 @@ const ChatPage = ({ navigation, route }) => {
                     savedChats = [...data, newRoomData]
 
                     storage.save({
-                        key: 'chatrooms',
+                        key: 'rooms',
                         data: savedChats
                     })
                 }
@@ -128,7 +128,7 @@ const ChatPage = ({ navigation, route }) => {
             .catch(e => {
                 console.log(e);
                 storage.save({
-                    key: 'chatrooms',
+                    key: 'rooms',
                     data: []
                 })
             })
@@ -211,7 +211,7 @@ const ChatPage = ({ navigation, route }) => {
         }
 
         const newChatroomsArray = changeRoomPosition(rooms, currentRoomIndex, 0)
-        storage.save({ key: 'chatrooms', data: newChatroomsArray })
+        storage.save({ key: 'rooms', data: newChatroomsArray })
         // console.log('currentRoomIndex', currentRoomIndex)
     }
 
@@ -328,7 +328,7 @@ const ChatPage = ({ navigation, route }) => {
             <View style={globalStyles.appBar}>
                 <View style={globalStyles.flex}>
                     <TouchableOpacity onPress={() => { navigation.goBack() }}>
-                        <Icon name='ios-arrow-back-outline' color='#006aee' size={25} />
+                        <Icon name='ios-arrow-back-outline' color='#fff' size={25} />
                     </TouchableOpacity>
                     <View style={globalStyles.space20}></View>
                     <View style={globalStyles.flex}>
@@ -339,7 +339,7 @@ const ChatPage = ({ navigation, route }) => {
 
                 <View style={globalStyles.flex}>
                     <TouchableOpacity onPress={() => { actionSheetRef.current?.setModalVisible(); }}>
-                        <Icon name='ellipsis-vertical-outline' color='#006aee' size={23} />
+                        <Icon name='ellipsis-vertical-outline' color='#fff' size={23} />
                     </TouchableOpacity>
                 </View>
             </View>

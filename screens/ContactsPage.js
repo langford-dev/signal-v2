@@ -46,13 +46,14 @@ const ContactsPage = () => {
             <View style={globalStyles.appBar}>
                 <View style={globalStyles.flex}>
                     <TouchableOpacity onPress={() => { navigation.goBack() }}>
-                        <Icon name='ios-arrow-back-outline' color='#006aee' size={25} />
+                        <Icon name='ios-arrow-back-outline' color='#fff' size={25} />
                     </TouchableOpacity>
+                    <View style={globalStyles.space20} />
                     <Text style={globalStyles.appBarTitle}>New Message</Text>
                 </View>
                 <View style={globalStyles.flex}>
                     <TouchableOpacity onPress={() => { navigation.navigate(SearchPage) }}>
-                        <Icon name='ellipsis-vertical-outline' color='#006aee' size={23} />
+                        <Icon name='ios-search-outline' color='#fff' size={23} />
                     </TouchableOpacity>
                 </View>
             </View>
