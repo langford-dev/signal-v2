@@ -3,7 +3,7 @@ import { Dimensions, Platform, StatusBar, StyleSheet } from 'react-native'
 const globalStyles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f1f1f1',
+        backgroundColor: '#fff',
         // backgroundColor: 'rgb(235,235,240)',
     },
 
@@ -40,8 +40,9 @@ const globalStyles = StyleSheet.create({
     },
 
     lgText: {
-        fontSize: 25,
+        fontSize: 20,
         fontWeight: 'bold',
+        color: '#000'
     },
 
     whiteText: {
@@ -115,6 +116,7 @@ const globalStyles = StyleSheet.create({
         fontSize: 20,
         borderWidth: 1,
         borderColor: '#f1f1f1',
+        width: '82%',
         // backgroundColor: '#f1f1f1',
         padding: 15,
         borderRadius: 10,

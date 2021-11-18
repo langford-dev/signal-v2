@@ -9,6 +9,8 @@ import ContactsPage from './ContactsPage';
 import io from "socket.io-client";
 import * as Notifications from "expo-notifications";
 import axios from 'axios';
+import CountryPicker from 'react-native-country-picker-modal'
+
 
 const socket = io('https://signal-v2-server.herokuapp.com/')
 
@@ -26,32 +28,34 @@ function HomeScreen({ navigation }) {
 
     const [rooms, setRooms] = useState([])
     const [hasRooms, setHasRooms] = useState([])
-    const [phoneNumber, setPhoneNumber] = useState('+233550202871')
+    const [phoneNumber, setPhoneNumber] = useState()
     const [otp, setOTP] = useState('')
     const [isAuth, setIsAuth] = useState(false)
     const [isEnteredNumber, setIsEnteredNumber] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [countryCode, setCountryCode] = useState('');
 
-    // const [initializing, setInitializing] = useState(true);
-    // const [user, setUser] = useState();
-    // const [confirm, setConfirm] = useState(null);
-    // const [code, setCode] = useState('');
 
     React.useEffect(() => {
+
+        // setIsEnteredNumber(false)
+        // setIsAuth(false)
 
         navigation.addListener('focus', async () => {
             console.log('isFocused')
 
-            await storage.load({ key: 'phoneNumber' }).then(data => {
-                // console.log('phoneNumber', data)
+            await storage.load({ key: 'phoneNumber' })
+                .then(data => {
 
-                if (data !== null) {
-                    setLoading(true)
-                    setPhoneNumber(data)
-                    setIsEnteredNumber(true)
-                    setIsAuth(true)
-                }
-            })
+                    if (data !== null) {
+                        setLoading(true)
+                        setPhoneNumber(data)
+                        setIsEnteredNumber(true)
+                        setIsAuth(true)
+                    }
+                })
+
+                .catch(e => { console.log(e) })
 
             await storage.load({ key: 'chatrooms' })
                 .then(data => {
@@ -60,7 +64,9 @@ function HomeScreen({ navigation }) {
 
                     if (data.length > 0) setHasRooms(true)
                     else setHasRooms(false)
-                }).catch(e => { console.log(e); setHasRooms(false) })
+                })
+
+                .catch(e => { console.log(e); setHasRooms(false) })
             return;
         });
 
@@ -77,27 +83,57 @@ function HomeScreen({ navigation }) {
 
     const triggerInputNumber = async () => {
         try {
-            setLoading(true)
-            const reponse = await axios.post('http://localhost:4040/auth/number', { 'number': phoneNumber })
-            console.log(reponse.data)
+            console.log('phoneNumber', phoneNumber.length)
 
-            if (reponse != null) {
-                setIsEnteredNumber(true)
-                setLoading(false)
+            if (phoneNumber === undefined) {
+                Alert.alert('', 'Please enter your phone number');
+                return;
             }
+
+            if (phoneNumber.length <= 5) {
+                Alert.alert('', 'Check the length of the number you entered');
+                return
+            }
+
+            if (countryCode) {
+                setLoading(true)
+
+                const newNumber = countryCode + phoneNumber
+                const reponse = await axios.post('http://localhost:4040/auth/number', { 'number': newNumber })
+
+                if (reponse.status === 200) {
+                    setIsEnteredNumber(true)
+                    setLoading(false)
+                }
+            } { Alert.alert('', 'Select your country'); return }
+
         } catch (e) {
             setLoading(false);
-            alert('A network error occured. Please try again')
+
+            console.log(e.message)
+
+            if (e.message === 'Request failed with status code 400') {
+                Alert.alert('', 'You entered the wrong phone number');
+                return
+            }
+
+            if (e.message === 'Request failed with status code 501') {
+                Alert.alert('', 'Please check your internet connection');
+                return
+            }
+
+            Alert.alert('', 'Please try again later')
         }
     }
 
     const checkotp = async () => {
         try {
+            const newNumber = countryCode + phoneNumber
             setLoading(true)
-            const reponse = await axios.post('http://localhost:4040/auth/verify/number', { 'number': phoneNumber, 'otp': otp })
+            const reponse = await axios.post('http://localhost:4040/auth/verify/number', { 'number': newNumber, 'otp': otp })
             console.log(reponse.data)
 
-            if (reponse.data.status === 'approved') {
+            if (reponse.data.status === 'approved' && reponse.data.valid) {
                 await storage.save({ key: 'phoneNumber', data: phoneNumber })
                 setLoading(false)
                 setIsAuth(true)
@@ -120,15 +156,16 @@ function HomeScreen({ navigation }) {
 
     // otp
     if (!isAuth && isEnteredNumber) return (
-        <ScrollView style={{ paddingVertical: 100, paddingHorizontal: 20, backgroundColor: '#fff', }}>
+        <ScrollView style={{ paddingVertical: 70, paddingHorizontal: 20, backgroundColor: '#fff', }}>
             <Text style={[globalStyles.lgText, globalStyles.textAlignCenter]}> Verify your account </Text>
             <View style={globalStyles.space10} />
             <Text style={[globalStyles.textAlignCenter, globalStyles.greyText, globalStyles.lineHeight]}> Enter the OTP you received by SMS. This extra layer of security protects your account from attacters </Text>
             <View style={globalStyles.space10} />
             <TouchableOpacity onPress={() => setIsEnteredNumber(false)}>
-                <Text style={[globalStyles.textBtn, globalStyles.textAlignCenter]}> Change number {phoneNumber} </Text>
+                <Text style={[globalStyles.textBtn, globalStyles.textAlignCenter]}> Change number {countryCode + phoneNumber} </Text>
             </TouchableOpacity>
             <View style={globalStyles.space30} />
+
             <TextInput
                 autoFocus={true}
                 style={globalStyles.authInputBox}
@@ -153,25 +190,40 @@ function HomeScreen({ navigation }) {
         left: 0,
     }}>
 
-        <ScrollView style={{ paddingVertical: 100, paddingHorizontal: 20, backgroundColor: '#fff', }}>
+        <ScrollView style={{ paddingVertical: 70, paddingHorizontal: 20, backgroundColor: '#fff', }}>
             <View style={globalStyles.flexCenterColumn}>
                 <Text style={[globalStyles.lgText, globalStyles.textAlignCenter]}>
-                    Input your phone number to get started
+                    Input your phone number to start private messaging
                 </Text>
             </View>
             <View style={globalStyles.space30}></View>
             <Text style={[globalStyles.textAlignCenter, globalStyles.greyText, globalStyles.lineHeight]}>
-                Your number will be only be visible to people who have your number saved on their contact list
+                {/* Your number will be only be visible to people who have your number saved on their contact list.  */}
+                Enter your number without your country code
             </Text>
             <View style={globalStyles.space30}></View>
 
-            <TextInput
-                autoFocus={true}
-                keyboardType='phone-pad'
-                style={globalStyles.authInputBox}
-                value={phoneNumber}
-                onChangeText={(value) => setPhoneNumber(value)} />
-            {/* onChangeText={(value) => setPhoneNumber(value.replace(/[^a-zA-Z0-9]/g, "").split(/\s+/).join(""))} /> */}
+            <CountryPicker
+                // withModal={false}
+                withCallingCode={true}
+                withFilter={true}
+                // onOpen={alert('')}
+                // visible={true}
+                onSelect={code => setCountryCode('+' + code.callingCode[0])} />
+            <View style={globalStyles.space30} />
+
+            <View style={globalStyles.flex}>
+                <Text>{countryCode ? '' : '+000'} {countryCode}</Text>
+                <View style={globalStyles.space20} />
+                <TextInput
+                    autoFocus={true}
+                    keyboardType='phone-pad'
+                    style={globalStyles.authInputBox}
+                    value={phoneNumber}
+                    placeholder='eg. 550202871'
+                    // onChangeText={(value) => setPhoneNumber(value)} />
+                    onChangeText={(value) => setPhoneNumber(value.replace(/[^a-zA-Z0-9]/g, "").split(/\s+/).join(""))} />
+            </View>
 
             <View style={globalStyles.space30}></View>
             <TouchableOpacity style={globalStyles.btn} onPress={() => triggerInputNumber()}>
