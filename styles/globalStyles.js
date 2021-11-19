@@ -235,7 +235,7 @@ const globalStyles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingLeft: 2,
-        zIndex: 100,
+        zIndex: 10,
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
@@ -341,9 +341,9 @@ const globalStyles = StyleSheet.create({
         position: 'absolute',
         flex: 1,
         justifyContent: 'center',
+        flexDirection: 'column',
         alignItems: 'center',
-        flexDirection: 'row',
-        // backgroundColor: '#fff'
+        zIndex: 30
     },
 
     // smallText: {

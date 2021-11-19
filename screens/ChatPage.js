@@ -7,6 +7,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import ActionSheet from "react-native-actions-sheet";
 import axios from 'axios';
 import * as Notifications from "expo-notifications";
+import { parsePhoneNumber, validatePhoneNumberLength } from 'libphonenumber-js'
 
 // const socket = io('http://localhost:8000')
 const socket = io('https://signal-v2-server.herokuapp.com/')
@@ -24,7 +25,7 @@ const ChatPage = ({ navigation, route }) => {
     const actionSheetRef = createRef();
     const chatBackgroungImg = { uri: "https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png" };
     const contactName = route.params.roomData.roomName
-    const contactNumber = route.params.roomData.roomNumber
+    const [contactNumber, setContactNumber] = useState(route.params.roomData.roomNumber)
 
     const [messageText, setMessageText] = useState()
     const [isTyping, setIsTyping] = useState(false)
@@ -39,6 +40,11 @@ const ChatPage = ({ navigation, route }) => {
     const scrollViewRef = useRef();
 
     React.useEffect(async () => {
+        const phoneNumber = parsePhoneNumber(contactNumber, 'GH')
+        setContactNumber((phoneNumber.formatInternational()).split(/\s+/).join(""))
+
+        console.log('myNumber', getRoomID())
+
         const initApp = async () => {
             try {
                 await storage.load({ key: 'phoneNumber' }).then(number => {
@@ -59,6 +65,7 @@ const ChatPage = ({ navigation, route }) => {
             socket.on('typing', () => { setIsTyping(true); setTimeout(() => { setIsTyping(false) }, 3000); })
             socket.on('new-message', async (data) => {
                 setMessages([...messages, data])
+                scrollViewRef.current.scrollToEnd()
 
                 let a = [...messages, data]
                 await storage.save({ key: roomId, data: a }).catch(e => { })
@@ -256,23 +263,23 @@ const ChatPage = ({ navigation, route }) => {
             )
         }
 
-        else return (
-            <View style={[globalStyles.flex, styles.textInputContainerIcons]}>
-                <TouchableOpacity style={{
-                    backgroundColor: '#006aee',
-                    borderRadius: 100,
-                    width: 47,
-                    height: 47,
-                    marginLeft: -1,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+        // else return (
+        //     <View style={[globalStyles.flex, styles.textInputContainerIcons]}>
+        //         <TouchableOpacity style={{
+        //             backgroundColor: '#006aee',
+        //             borderRadius: 100,
+        //             width: 47,
+        //             height: 47,
+        //             marginLeft: -1,
+        //             flexDirection: 'row',
+        //             alignItems: 'center',
+        //             justifyContent: 'center'
 
-                }}><Icon name='ios-add-outline' color='#fff' size={35} /></TouchableOpacity>
-                {/* <View style={globalStyles.space10}></View> */}
-                {/* <TouchableOpacity><Icon name='ios-camera-outline' color='#006aee' size={29} /></TouchableOpacity> */}
-            </View>
-        )
+        //         }}><Icon name='ios-add-outline' color='#fff' size={35} /></TouchableOpacity>
+        //         {/* <View style={globalStyles.space10}></View> */}
+        //         {/* <TouchableOpacity><Icon name='ios-camera-outline' color='#006aee' size={29} /></TouchableOpacity> */}
+        //     </View>
+        // )
     }
 
     const MessageItemUi = (data) => {

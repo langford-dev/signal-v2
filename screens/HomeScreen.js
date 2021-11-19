@@ -1,5 +1,5 @@
 import React, { createRef, useEffect, useRef, useState } from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, TextInput, ActivityIndicator, ScrollView, Image, StyleSheet, Dimensions, Alert } from 'react-native';
+import { View, Button, Text, SafeAreaView, TouchableOpacity, TextInput, ActivityIndicator, ScrollView, Image, StyleSheet, Dimensions, Alert } from 'react-native';
 import { NavigationContainer, useNavigation, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import ActionSheet from "react-native-actions-sheet";
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -10,11 +10,16 @@ import io from "socket.io-client";
 import * as Notifications from "expo-notifications";
 import axios from 'axios';
 import CountryPicker from 'react-native-country-picker-modal'
+import { Platform } from 'expo-modules-core';
+// import Icon from 'react-native-vector-icons/Ionicons';
 
 
 const socket = io('https://signal-v2-server.herokuapp.com/')
 
-// storage.remove({ key: 'roomID' })
+// storage.save({ key: 'phoneNumber', data: '+233' + '550202871' })
+// storage.remove({ key: 'phoneNumber' })
+// storage.remove({ key: 'rooms' })
+
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
         shouldShowAlert: true,
@@ -23,8 +28,9 @@ Notifications.setNotificationHandler({
     }),
 });
 
-function HomeScreen({ navigation }) {
+function HomeScreen() {
     const actionSheetRef = createRef();
+    const navigation = useNavigation()
 
     const [rooms, setRooms] = useState([])
     const [hasRooms, setHasRooms] = useState([])
@@ -34,28 +40,26 @@ function HomeScreen({ navigation }) {
     const [isEnteredNumber, setIsEnteredNumber] = useState(false)
     const [loading, setLoading] = useState(false)
     const [countryCode, setCountryCode] = useState('');
-
+    const [sheetClosable, setSheetClosable] = useState(false)
+    const [doneAuth, setDoneAuth] = useState(false)
 
     React.useEffect(() => {
-
-        // setIsEnteredNumber(false)
-        // setIsAuth(false)
+        // actionSheetRef.current?.setModalVisible();
 
         navigation.addListener('focus', async () => {
             console.log('isFocused')
 
             await storage.load({ key: 'phoneNumber' })
                 .then(data => {
-
                     if (data !== null) {
-                        setLoading(true)
                         setPhoneNumber(data)
                         setIsEnteredNumber(true)
                         setIsAuth(true)
                     }
                 })
-
-                .catch(e => { console.log(e) })
+                .catch(e => {
+                    actionSheetRef.current?.setModalVisible();
+                })
 
             await storage.load({ key: 'rooms' })
                 .then(data => {
@@ -71,10 +75,10 @@ function HomeScreen({ navigation }) {
         });
 
         return () => { console.log('is not isFocused'); }
-    }, [navigation]);
+    }, [navigation, isEnteredNumber, isAuth]);
 
     const hasRoomsLabel = () => {
-        if (!hasRooms) return <View style={globalStyles.flexCenterColumn}>
+        if (!hasRooms && isAuth) return <View style={globalStyles.flexCenterColumn}>
             <View style={globalStyles.space30}></View>
             <Text style={globalStyles.boldText}>No chats yet</Text>
             <Text style={globalStyles.boldText}>Get started by messaging a friend</Text>
@@ -82,15 +86,18 @@ function HomeScreen({ navigation }) {
     }
 
     const triggerInputNumber = async () => {
+        // actionSheetRef.current?.setModalVisible(false);
         try {
-            console.log('phoneNumber', phoneNumber.length)
+
+
+
 
             if (phoneNumber === undefined) {
                 Alert.alert('', 'Please enter your phone number');
                 return;
             }
 
-            if (phoneNumber.length <= 5) {
+            if (phoneNumber !== undefined && phoneNumber.length <= 5) {
                 Alert.alert('', 'Check the length of the number you entered');
                 return
             }
@@ -99,7 +106,7 @@ function HomeScreen({ navigation }) {
                 setLoading(true)
 
                 const newNumber = countryCode + phoneNumber
-                const reponse = await axios.post('http://localhost:4040/auth/number', { 'number': newNumber })
+                const reponse = await axios.post('https://signal-v2-auth-server.herokuapp.com/auth/number', { 'number': newNumber })
 
                 if (reponse.status === 200) {
                     setIsEnteredNumber(true)
@@ -130,13 +137,18 @@ function HomeScreen({ navigation }) {
         try {
             const newNumber = countryCode + phoneNumber
             setLoading(true)
-            const reponse = await axios.post('http://localhost:4040/auth/verify/number', { 'number': newNumber, 'otp': otp })
-            console.log(reponse.data)
+            const reponse = await axios.post('https://signal-v2-auth-server.herokuapp.com/auth/verify/number', { 'number': newNumber, 'otp': otp })
 
-            if (reponse.data.status === 'approved' && reponse.data.valid) {
+            if (reponse.data.valid) {
+
                 await storage.save({ key: 'phoneNumber', data: countryCode + phoneNumber })
-                setLoading(false)
+                await storage.save({ key: 'rooms', data: [] })
+                await storage.save({ key: 'contacts', data: [] })
+
+                close()
+                setDoneAuth(true)
                 setIsAuth(true)
+                setLoading(false)
             }
 
             else { alert('You entered the wrong code'); setLoading(false) }
@@ -148,93 +160,116 @@ function HomeScreen({ navigation }) {
         }
     }
 
-    if (loading) return (
-        <View style={[globalStyles.loader, globalStyles.flexCenterColumn]}>
-            <ActivityIndicator size={50} color="#006aee" />
-        </View>
-    )
+    function close() {
+        setSheetClosable(true)
+        actionSheetRef.current?.setModalVisible(false);
+    }
 
-    // otp
-    if (!isAuth && isEnteredNumber) return (
-        <ScrollView style={{ paddingVertical: 70, paddingHorizontal: 20, backgroundColor: '#fff', }}>
-            <Text style={[globalStyles.lgText, globalStyles.textAlignCenter]}> Verify your account </Text>
-            <View style={globalStyles.space10} />
-            <Text style={[globalStyles.textAlignCenter, globalStyles.greyText, globalStyles.lineHeight]}> Enter the OTP you received by SMS. This extra layer of security protects your account from attackers </Text>
-            <View style={globalStyles.space10} />
-            <TouchableOpacity onPress={() => setIsEnteredNumber(false)}>
-                <Text style={[globalStyles.textBtn, globalStyles.textAlignCenter]}> Change number {countryCode + phoneNumber} </Text>
-            </TouchableOpacity>
-            <View style={globalStyles.space30} />
+    const authInterface = () => {
 
-            <TextInput
-                autoFocus={true}
-                style={globalStyles.authInputBox}
-                value={otp}
-                onChangeText={(value) => setOTP(value.split(/\s+/).join(""))} />
+        // otp
+        if (isEnteredNumber && !loading && !doneAuth) return (
+            <View style={{ paddingHorizontal: 20, zIndex: 20, paddingTop: 50, backgroundColor: '#fff', height: Dimensions.get('window').height }}>
+                <Text style={[globalStyles.lgText, globalStyles.textAlignCenter]}> Verify your account </Text>
+                <View style={globalStyles.space10} />
+                <Text style={[globalStyles.textAlignCenter, globalStyles.greyText, globalStyles.lineHeight]}> Enter the OTP you received by SMS. This extra layer of security protects your account from attackers </Text>
+                <View style={globalStyles.space10} />
+                <TouchableOpacity onPress={() => setIsEnteredNumber(false)}>
+                    <Text style={[globalStyles.textBtn, globalStyles.textAlignCenter]}> Change number {countryCode + phoneNumber} </Text>
+                </TouchableOpacity>
+                <View style={globalStyles.space30} />
 
-            <View style={globalStyles.space30}></View>
-            <TouchableOpacity style={globalStyles.btn} onPress={() => checkotp()}>
-                <Text style={globalStyles.btnText}>Verify</Text>
-            </TouchableOpacity>
-        </ScrollView>
-    )
-
-
-    // phone number
-    if (!isAuth && !isEnteredNumber) return (<View style={{
-        width: Dimensions.get('window').width,
-        height: Dimensions.get('window').height,
-        zIndex: 1000,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-    }}>
-
-        <ScrollView style={{ paddingVertical: 70, paddingHorizontal: 20, backgroundColor: '#fff', }}>
-            <View style={globalStyles.flexCenterColumn}>
-                <Text style={[globalStyles.lgText, globalStyles.textAlignCenter]}>
-                    Input your phone number to start private messaging
-                </Text>
-            </View>
-            <View style={globalStyles.space30}></View>
-            <Text style={[globalStyles.textAlignCenter, globalStyles.greyText, globalStyles.lineHeight]}>
-                {/* Your number will be only be visible to people who have your number saved on their contact list.  */}
-                Enter your number without your country code
-            </Text>
-            <View style={globalStyles.space30}></View>
-
-            <CountryPicker
-                // withModal={false}
-                withCallingCode={true}
-                withFilter={true}
-                // onOpen={alert('')}
-                // visible={true}
-                onSelect={code => setCountryCode('+' + code.callingCode[0])} />
-            <View style={globalStyles.space30} />
-
-            <View style={globalStyles.flex}>
-                <Text>{countryCode ? '' : '+000'} {countryCode}</Text>
-                <View style={globalStyles.space20} />
                 <TextInput
                     autoFocus={true}
-                    keyboardType='phone-pad'
                     style={globalStyles.authInputBox}
-                    value={phoneNumber}
-                    placeholder='eg. 550202871'
-                    // onChangeText={(value) => setPhoneNumber(value)} />
-                    onChangeText={(value) => setPhoneNumber(value.replace(/[^a-zA-Z0-9]/g, "").split(/\s+/).join(""))} />
+                    value={otp}
+                    onChangeText={(value) => setOTP(value.split(/\s+/).join(""))} />
+
+                <View style={globalStyles.space30}></View>
+                <TouchableOpacity style={globalStyles.btn} onPress={() => checkotp()}>
+                    <Text style={globalStyles.btnText}>Verify</Text>
+                </TouchableOpacity>
             </View>
+        )
 
-            <View style={globalStyles.space30}></View>
-            <TouchableOpacity style={globalStyles.btn} onPress={() => triggerInputNumber()}>
-                <Text style={globalStyles.btnText}>Next</Text>
-            </TouchableOpacity>
-        </ScrollView>
+        // phone number
+        if (!isEnteredNumber && !loading && !doneAuth) return (
+            <View style={{ paddingHorizontal: 20, zIndex: 20, paddingTop: 50, backgroundColor: '#fff', height: Dimensions.get('window').height }}>
+                <View style={globalStyles.flexCenterColumn}>
+                    <Text style={[globalStyles.lgText, globalStyles.textAlignCenter]}>
+                        Input your phone number to start private messaging
+                    </Text>
+                </View>
+                <View style={globalStyles.space30}></View>
+                <Text style={[globalStyles.textAlignCenter, globalStyles.greyText, globalStyles.lineHeight]}>
+                    {/* Your number will be only be visible to people who have your number saved on their contact list.  */}
+                    Enter your number without your country code
+                </Text>
+                <View style={globalStyles.space30}></View>
 
-    </View>)
+                <CountryPicker
+                    // withModal={false}
+                    withCallingCode={true}
+                    withFilter={true}
+                    // onOpen={alert('')}
+                    // visible={true}
+                    onSelect={code => setCountryCode('+' + code.callingCode[0])} />
+                <View style={globalStyles.space30} />
+
+                <View style={globalStyles.flex}>
+                    <Text>{countryCode ? '' : '+000'} {countryCode}</Text>
+                    <View style={globalStyles.space20} />
+                    <TextInput
+                        autoFocus={true}
+                        keyboardType='phone-pad'
+                        style={globalStyles.authInputBox}
+                        value={phoneNumber}
+                        placeholder='eg. 550202871'
+                        // onChangeText={(value) => setPhoneNumber(value)} />
+                        onChangeText={(value) => setPhoneNumber(value.replace(/[^a-zA-Z0-9]/g, "").split(/\s+/).join(""))} />
+                </View>
+
+                <View style={globalStyles.space30}></View>
+
+                <TouchableOpacity style={globalStyles.btn} onPress={() => triggerInputNumber()}>
+                    <Text style={globalStyles.btnText}>Next</Text>
+                </TouchableOpacity>
+
+                {/* <Button style={globalStyles.btn} onPress={() => triggerInputNumber()} title='dd' /> */}
+            </View>
+        )
+
+        if (doneAuth) return (
+            <View style={{
+                height: '100%',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}>
+                <TouchableOpacity onPress={() => actionSheetRef.current?.setModalVisible(false)}>
+                    <Icon name={'lock-open'} size={100} color='#006aee' />
+                </TouchableOpacity>
+                <View style={globalStyles.space30} />
+                <Text style={{
+                    color: '#000', fontSize: 20, textAlign: 'center',
+                    paddingHorizontal: 50,
+                    fontWeight: 'bold'
+                }}>
+                    Press the lock to complete verification
+                </Text>
+            </View>
+        )
+
+        if (loading) return (
+            <View style={[globalStyles.loader, globalStyles.flexCenterColumn]}>
+                <ActivityIndicator size={50} color="#006aee" />
+            </View>
+        )
+
+    }
 
     // HomeScreen
-    if (isAuth && isEnteredNumber) return (
+    return (
         <View style={globalStyles.container}>
             <View style={globalStyles.appBar}>
                 <View style={globalStyles.flex}>
@@ -245,7 +280,7 @@ function HomeScreen({ navigation }) {
                 </View>
 
                 <View style={globalStyles.flex}>
-                    <TouchableOpacity onPress={() => { navigation.navigate(SearchPage) }}>
+                    <TouchableOpacity onPress={() => { }}>
                         <Icon name='ios-search-outline' size={22} color='#fff' />
                     </TouchableOpacity>
                     <View style={globalStyles.space30}></View>
@@ -269,19 +304,29 @@ function HomeScreen({ navigation }) {
                 }
             </ScrollView>
 
-            <TouchableOpacity style={globalStyles.fab} onPress={() => { navigation.navigate(ContactsPage); }}>
+            {/* <Button
+                onPress={() => navigation.navigate(ContactsPage)}
+                title="Learn More"
+            /> */}
+
+            {/* onPress={() => { navigation.navigate(ContactsPage) }} */}
+
+            <TouchableOpacity style={globalStyles.fab} onPress={() => navigation.navigate(ContactsPage)}>
                 <Icon name='md-pencil-sharp' color='#fff' size={30} />
             </TouchableOpacity>
 
             <ActionSheet
-                gestureEnabled={true}
-                bounceOnOpen={true}
-                openAnimationSpeed={10}
-                bounciness={5}
+                // gestureEnabled={false}
+                openAnimationSpeed={50}
                 defaultOverlayOpacity={0.1}
                 ref={actionSheetRef}
-                containerStyle={globalStyles.bottomSheet}
-                indicatorColor={'#ccc'}>
+                closable={sheetClosable}
+                containerStyle={globalStyles.bottomSheet} >
+                <View style={{
+                    height: Platform.OS === 'ios' ? Dimensions.get('window').height - 56 : Dimensions.get('window').height - 20
+                }}>
+                    {authInterface()}
+                </View>
             </ActionSheet>
         </View>
     )
@@ -393,15 +438,15 @@ const ChatRoomCard = (props) => {
     )
 }
 
-const SearchPage = ({ navigation }) => {
-    return (
-        <SafeAreaView style={globalStyles.container}>
-            <View style={globalStyles.appBar}>
-                <TouchableOpacity onPress={() => { navigation.goBack() }}><Icon name='ios-arrow-back-outline' color='#006aee' size={22} /></TouchableOpacity>
-                <TextInput autoFocus={true} style={[globalStyles.inputBox, globalStyles.searchInputBox]} placeholder='Search' />
-            </View>
-        </SafeAreaView>
-    )
-}
+// const SearchPage = ({ navigation }) => {
+//     return (
+//         <SafeAreaView style={globalStyles.container}>
+//             <View style={globalStyles.appBar}>
+//                 <TouchableOpacity onPress={() => { navigation.goBack() }}><Icon name='ios-arrow-back-outline' color='#006aee' size={22} /></TouchableOpacity>
+//                 <TextInput autoFocus={true} style={[globalStyles.inputBox, globalStyles.searchInputBox]} placeholder='Search' />
+//             </View>
+//         </SafeAreaView>
+//     )
+// }
 
 export default HomeScreen
